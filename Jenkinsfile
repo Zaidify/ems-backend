@@ -2,16 +2,14 @@ pipeline {
     agent any
 
     tools {
-        jdk 'Java'    // JDK configured in Jenkins
-        maven 'Maven' // Maven configured in Jenkins
+        jdk 'Java'
+        maven 'Maven'
     }
 
     environment {
         EC2_USER = 'ubuntu'
         EC2_HOST = '13.232.111.201'
-        SSH_CREDENTIALS = 'aws-ec2-key'
-        APP_NAME = 'springboot-backend.jar'
-        GIT_BASH = '"C:\\Program Files\\Git\\bin\\bash.exe"' // Path to Git Bash
+        APP_NAME = 'springboot-backend-0.0.1-SNAPSHOT.jar'
     }
 
     stages {
@@ -29,13 +27,6 @@ pipeline {
             }
         }
 
-//         stage('Test') {
-//             steps {
-//                 echo 'Running unit tests...'
-//                 bat 'mvn test'
-//             }
-//         }
-
         stage('Package') {
             steps {
                 echo 'Packaging Spring Boot application...'
@@ -46,10 +37,12 @@ pipeline {
         stage('Deploy to AWS EC2') {
             steps {
                 echo "Deploying application to EC2..."
-                bat """
-                    scp -i C:/aws-key/ems-1.pem target/springboot-backend-0.0.1-SNAPSHOT.jar ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/
-                    ssh -i C:/aws-key/ems-1.pem ubuntu@<EC2_PUBLIC_IP> 'nohup java -jar springboot-backend-0.0.1-SNAPSHOT.jar > app.log 2>&1 &'
-                """
+                sshagent(['aws-ec2-key']) {  // <-- Jenkins SSH credential ID
+                    bat """
+                        scp target\\${APP_NAME} %EC2_USER%@%EC2_HOST%:/home/ubuntu/
+                        ssh %EC2_USER%@%EC2_HOST% "nohup java -jar /home/ubuntu/${APP_NAME} > /home/ubuntu/app.log 2>&1 &"
+                    """
+                }
             }
         }
     }
