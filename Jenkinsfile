@@ -45,14 +45,11 @@ pipeline {
 
         stage('Deploy to AWS EC2') {
             steps {
-                echo 'Deploying application to EC2...'
-                sshagent([env.SSH_CREDENTIALS]) {
-                    bat """
-                    ${GIT_BASH} -c "scp -o StrictHostKeyChecking=no target\\*.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/${APP_NAME}"
-                    ${GIT_BASH} -c "ssh ${EC2_USER}@${EC2_HOST} 'pkill -f ${APP_NAME} || true'"
-                    ${GIT_BASH} -c "ssh ${EC2_USER}@${EC2_HOST} 'nohup java -jar /home/${EC2_USER}/${APP_NAME} > app.log 2>&1 &'"
-                    """
-                }
+                echo "Deploying application to EC2..."
+                bat """
+                    scp -i C:/path/to/key.pem target/springboot-backend-0.0.1-SNAPSHOT.jar ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/
+                    ssh -i C:/path/to/key.pem ubuntu@<EC2_PUBLIC_IP> 'nohup java -jar springboot-backend-0.0.1-SNAPSHOT.jar > app.log 2>&1 &'
+                """
             }
         }
     }
