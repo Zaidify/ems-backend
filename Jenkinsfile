@@ -37,10 +37,13 @@ pipeline {
         stage('Deploy to AWS EC2') {
             steps {
                 echo "Deploying application to EC2..."
-                sshagent(['aws-ec2-key']) {  // <-- Jenkins SSH credential ID
+                sshagent(['aws-ec2-key']) {  // Jenkins SSH credential ID
                     bat """
-                        scp target\\${APP_NAME} %EC2_USER%@%EC2_HOST%:/home/ubuntu/
-                        ssh %EC2_USER%@%EC2_HOST% "nohup java -jar /home/ubuntu/${APP_NAME} > /home/ubuntu/app.log 2>&1 &"
+                        REM Copy jar to EC2 (ignore host key verification)
+                        scp -o StrictHostKeyChecking=no target\\${APP_NAME} %EC2_USER%@%EC2_HOST%:/home/ubuntu/
+
+                        REM Run Spring Boot app on EC2
+                        ssh -o StrictHostKeyChecking=no %EC2_USER%@%EC2_HOST% "nohup java -jar /home/ubuntu/${APP_NAME} > /home/ubuntu/app.log 2>&1 &"
                     """
                 }
             }
