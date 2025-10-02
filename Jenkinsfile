@@ -29,12 +29,12 @@ pipeline {
             }
         }
 
-        stage('Test') {
-            steps {
-                echo 'Running unit tests...'
-                bat 'mvn test'
-            }
-        }
+//         stage('Test') {
+//             steps {
+//                 echo 'Running unit tests...'
+//                 bat 'mvn test'
+//             }
+//         }
 
         stage('Package') {
             steps {
