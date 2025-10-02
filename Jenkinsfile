@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'Java'
-        maven 'Maven'
+        jdk 'Java'    // JDK configured in Jenkins
+        maven 'Maven' // Maven configured in Jenkins
     }
 
     environment {
@@ -11,6 +11,7 @@ pipeline {
         EC2_HOST = '13.232.111.201'
         SSH_CREDENTIALS = 'aws-ec2-key'
         APP_NAME = 'springboot-backend.jar'
+        GIT_BASH = '"C:\\Program Files\\Git\\bin\\bash.exe"' // Path to Git Bash
     }
 
     stages {
@@ -24,21 +25,21 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building project with Maven...'
-                sh 'mvn clean install -DskipTests'
+                bat 'mvn clean install -DskipTests'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running unit tests...'
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('Package') {
             steps {
                 echo 'Packaging Spring Boot application...'
-                sh 'mvn package -DskipTests'
+                bat 'mvn package -DskipTests'
             }
         }
 
@@ -46,10 +47,10 @@ pipeline {
             steps {
                 echo 'Deploying application to EC2...'
                 sshagent([env.SSH_CREDENTIALS]) {
-                    sh """
-                    scp -o StrictHostKeyChecking=no target/*.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/${APP_NAME}
-                    ssh ${EC2_USER}@${EC2_HOST} 'pkill -f ${APP_NAME} || true'
-                    ssh ${EC2_USER}@${EC2_HOST} 'nohup java -jar /home/${EC2_USER}/${APP_NAME} > app.log 2>&1 &'
+                    bat """
+                    ${GIT_BASH} -c "scp -o StrictHostKeyChecking=no target\\*.jar ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/${APP_NAME}"
+                    ${GIT_BASH} -c "ssh ${EC2_USER}@${EC2_HOST} 'pkill -f ${APP_NAME} || true'"
+                    ${GIT_BASH} -c "ssh ${EC2_USER}@${EC2_HOST} 'nohup java -jar /home/${EC2_USER}/${APP_NAME} > app.log 2>&1 &'"
                     """
                 }
             }
