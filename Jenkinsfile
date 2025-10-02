@@ -47,8 +47,8 @@ pipeline {
             steps {
                 echo "Deploying application to EC2..."
                 bat """
-                    scp -i C:/path/to/key.pem target/springboot-backend-0.0.1-SNAPSHOT.jar ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/
-                    ssh -i C:/path/to/key.pem ubuntu@<EC2_PUBLIC_IP> 'nohup java -jar springboot-backend-0.0.1-SNAPSHOT.jar > app.log 2>&1 &'
+                    scp -i C:/aws-key/ems-1.pem target/springboot-backend-0.0.1-SNAPSHOT.jar ubuntu@<EC2_PUBLIC_IP>:/home/ubuntu/
+                    ssh -i C:/aws-key/ems-1.pem ubuntu@<EC2_PUBLIC_IP> 'nohup java -jar springboot-backend-0.0.1-SNAPSHOT.jar > app.log 2>&1 &'
                 """
             }
         }
